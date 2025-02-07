@@ -1,0 +1,16 @@
+# Intellij-Idea
+**/.idea/
+**/*.iml
+**/*.ipr
+**/*.iws
+**/out/
+
+# MVN
+**/target/
+
+
+# OS
+**/.DS_Store
+
+# vscode
+**/.vscode/
