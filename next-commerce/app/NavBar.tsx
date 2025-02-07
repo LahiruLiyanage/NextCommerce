@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function NavBar () {
     return (
-        <nav className={"bg-white shadow-md dark:bg-gray-900 dark:text-gray-200"}>
+        <nav className={"bg-white shadow-md dark:bg-black dark:shadow-gray-900 dark:text-gray-200"}>
             <div className={"container mx-auto px-4 py-3 flex justify-between items-center"}>
                 <ul className={"flex space-x-4"}>
                     <li>
