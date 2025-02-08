@@ -41,12 +41,19 @@ type CartBody = {
 }
 
 export async function POST(request: NextRequest, { params }: { params: Params }) {
+    const { db } = await connectToDb();
+
     const userId = params.id;
     const body: CartBody = await request.json();
     const productId = body.productId;
 
-    carts[userId] = carts[userId] ? carts[userId].concat(productId) : [productId];
-    const cartProducts = carts[userId].map(id => products.find(product => product.id === id));
+    const updatedCart = await db.collection('carts').findOneAndUpdate(
+        { userId },
+        { $push: { cartIds: productId } },
+        { upsert: true, returnDocument: 'after' },
+    );
+
+    const cartProducts = await db.collection('products').find({ id: { $in: updatedCart.cartIds } }).toArray();
 
     return new Response(JSON.stringify(cartProducts), {
         status: 201,
