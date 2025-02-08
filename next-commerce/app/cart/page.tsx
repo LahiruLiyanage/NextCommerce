@@ -15,10 +15,10 @@ export default function CartPage() {
 
             <ul className="space-y-4"> {/* List for cart items */}
                 {cartProducts.map(product => (
-                    <li key={product.id} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-300">
+                    <li key={product.id} className="dark:bg-gray-900 bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-300">
                         <Link href={`/products/${product.id}`}>
                             <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
-                            <p className="text-gray-600">${product.price}</p>
+                            <p className="dark:text-gray-300 text-gray-600">${product.price}</p>
                         </Link>
                     </li>
                 ))}
