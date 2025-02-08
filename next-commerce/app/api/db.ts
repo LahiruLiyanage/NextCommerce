@@ -23,7 +23,7 @@ export async function connectToDb() {
     await client.connect();
 
     cashedClient = client;
-    cashedDb = client.db();
+    cashedDb = client.db('next-commerce-nextjs');
 
-    return { client, db: client.db() }
+    return { client, db: client.db('next-commerce-nextjs') }
 }
