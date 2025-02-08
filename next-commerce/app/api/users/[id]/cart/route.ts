@@ -30,3 +30,21 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
         headers: { 'content-type': 'application/json' },
     });
 }
+
+type CartBody = {
+    productId: string;
+};
+
+export async function POST(request: NextRequest, { params }: { params: Params }){
+    const userId = params.id;
+    const body: CartBody = await request.json();
+    const productId = body.productId;
+
+    carts[userId] = carts[userId] ? carts[userId].concat(productId) : [productId];
+    const cartProducts = carts[userId].map(product => products.find(product => product.id === productId));
+
+    return new Response(JSON.stringify(cartProducts), {
+        status: 201,
+        headers: { 'content-type': 'application/json' },
+    })
+}
