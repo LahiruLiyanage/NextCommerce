@@ -1,4 +1,4 @@
-import {MongoClient, Db, ServerApiVersion} from 'mongodb';
+import { MongoClient, Db, ServerApiVersion } from 'mongodb';
 
 let cashedClient: MongoClient | null = null;
 let cashedDb: Db | null = null;
