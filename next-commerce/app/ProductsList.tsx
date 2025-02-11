@@ -2,7 +2,20 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Product } from "./product-data";
 
-export default function ProductsList({ products }: { products: Product[] }) {
+export default function ProductsList({ products, initialCartProducts }: { products: Product[], initialCartProducts: Product[] }) {
+
+
+    async function addToCart(productId) {
+        const response = await fetch(`http://localhost:3000/api/users/1/cart`, {
+            method: 'POST',
+            body: JSON.stringify({
+                productId,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+        });
+        const updatedCartProducts = await response.json();
+    }
+
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {products.map(product => (
@@ -21,6 +34,7 @@ export default function ProductsList({ products }: { products: Product[] }) {
                     </div>
                     <h2 className="text-xl font-semibold mb-2">{product.name}</h2>
                     <p className="dark:text-gray-300 text-gray-600">${product.price}</p>
+                    <button onClick={() => addToCart(product.id)}>Add to Cart</button>
                 </Link>
             ))}
         </div>
