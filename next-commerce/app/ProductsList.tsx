@@ -1,19 +1,23 @@
+'use client';
+import {useState} from "react";
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Product } from "./product-data";
 
-export default function ProductsList({ products, initialCartProducts }: { products: Product[], initialCartProducts: Product[] }) {
+export default function ProductsList({ products, initialCartProducts = [] }: { products: Product[], initialCartProducts: Product[] }) {
+    const [cartProducts, setCartProducts] = useState(initialCartProducts);
 
-
-    async function addToCart(productId) {
+    async function addToCart(productId: string) {
         const response = await fetch(`http://localhost:3000/api/users/1/cart`, {
             method: 'POST',
             body: JSON.stringify({
                 productId,
             }),
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', },
         });
         const updatedCartProducts = await response.json();
+        setCartProducts(updatedCartProducts);
     }
 
     return (
