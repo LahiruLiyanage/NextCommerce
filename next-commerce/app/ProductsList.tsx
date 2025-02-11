@@ -38,7 +38,10 @@ export default function ProductsList({ products, initialCartProducts = [] }: { p
                     </div>
                     <h2 className="text-xl font-semibold mb-2">{product.name}</h2>
                     <p className="dark:text-gray-300 text-gray-600">${product.price}</p>
-                    <button onClick={() => addToCart(product.id)}>Add to Cart</button>
+                    <button onClick={(e) => {
+                        e.preventDefault();
+                        addToCart(product.id);
+                    }}>Add to Cart</button>
                 </Link>
             ))}
         </div>
