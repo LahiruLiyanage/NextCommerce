@@ -1,6 +1,9 @@
 'use client';
 import {useState} from "react";
 
+export const dynamic = 'force-dynamic';
+
+
 import Image from 'next/image';
 import Link from 'next/link';
 import {Product} from "./product-data";
