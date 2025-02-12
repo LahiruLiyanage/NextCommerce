@@ -45,13 +45,13 @@ export default function ProductsList({ products, initialCartProducts = [] }: { p
                     <p className="dark:text-gray-300 text-gray-600">${product.price}</p>
                     {productIsInCart(product.id)
                         ? (
-                            <button className="dark:bg-indigo-900 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
+                            <button className="dark:bg-indigo-900 hover:shadow-lg bg-blue-500 hover:bg-blue-700 transition duration-300 text-white font-bold py-2 px-4 rounded w-full"
                                 onClick={(e) => {
                                 e.preventDefault();
                                 console.log('Removing from cart... (Not implemented)');
                             }}>Remove from Cart</button>
                         ) : (
-                        <button className="dark:bg-indigo-900 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
+                        <button className="dark:bg-indigo-900 hover:shadow-lg bg-blue-500 hover:bg-blue-700 transition duration-300 text-white font-bold py-2 px-4 rounded w-full"
                             onClick={(e) => {
                             e.preventDefault();
                             addToCart(product.id);
