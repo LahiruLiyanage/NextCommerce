@@ -40,8 +40,8 @@ NextCommerce is a **full-stack e-commerce web application** built with Next.js, 
 
 ## 📸 Screenshots
 
-[Screenshot 1]
-[Screenshot 2]
+![Screenshot 1](public/images/Screenshot-01.png)
+![Screenshot 2](public/images/Screenshot-02.png)
 
 ## 📜 License
 
@@ -68,3 +68,4 @@ For any questions or feedback, feel free to reach out:
 - Email: [lhlahiru95@gmail.com](lhlahiru95@gmail.com)
 - LinkedIn: [LahiruLiyanage](https://www.linkedin.com/in/liyanage-lahiru/)
 - GitHub: [@LahiruLiyanage](https://github.com/LahiruLiyanage)
+- WebSite: [lahiruliyanage.com](https://lahiruliyanage.com/)
