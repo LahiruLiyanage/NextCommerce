@@ -1,5 +1,6 @@
 // Add this to make the page dynamic instead of static
 import ProductsList from "@/app/ProductsList";
+import { headers } from "next/headers";
 
 export const dynamic = 'force-dynamic';
 
@@ -8,8 +9,14 @@ export default async function ProductsPage() {
     let cartProducts = [];
 
     try {
-        // Use relative URLs instead of absolute URLs with localhost
-        const response = await fetch(`/api/products`, {
+        // Get the host from request headers
+        const headersList = await headers();
+        const host = headersList.get("host") || "";
+        const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+        const baseUrl = `${protocol}://${host}`;
+
+        // Use absolute URLs with the detected base URL
+        const response = await fetch(`${baseUrl}/api/products`, {
             cache: 'no-store' // Ensure fresh data
         });
 
@@ -18,7 +25,7 @@ export default async function ProductsPage() {
         }
 
         try {
-            const response2 = await fetch(`/api/users/1/cart`, {
+            const response2 = await fetch(`${baseUrl}/api/users/1/cart`, {
                 cache: 'no-store',
             });
 
