@@ -1,14 +1,5 @@
 import { NextRequest } from 'next/server';
-import { products } from '@/app/product-data';
 import { connectToDb } from '@/app/api/db';
-
-type ShoppingCart = Record<string, string[]>;
-
-const carts: ShoppingCart = {
-    '1': ['123', '234'],
-    '2': ['345', '456'],
-    '3': ['234'],
-}
 
 type Params = {
     id: string;
@@ -18,28 +9,36 @@ export async function GET(
     request: NextRequest,
     { params }: { params: Promise<Params> }
 ) {
-    const [{ db }, resolvedParams] = await Promise.all([
-        connectToDb(),
-        params
-    ]);
+    try {
+        const [{ db }, resolvedParams] = await Promise.all([
+            connectToDb(),
+            params
+        ]);
 
-    const userId = resolvedParams.id;
-    const userCart = await db.collection('carts').findOne({ userId });
+        const userId = resolvedParams.id;
+        const userCart = await db.collection('carts').findOne({ userId });
 
-    if (!userCart) {
-        return new Response(JSON.stringify([]), {
+        if (!userCart) {
+            return new Response(JSON.stringify([]), {
+                status: 200,
+                headers: {'Content-Type': 'application/json'},
+            });
+        }
+
+        const cartIds = userCart.cartIds || [];
+        const cartProducts = await db.collection('products').find({ id: { $in: cartIds } }).toArray();
+
+        return new Response(JSON.stringify(cartProducts), {
             status: 200,
             headers: {'Content-Type': 'application/json'},
         });
+    } catch (error) {
+        console.error("GET cart error:", error);
+        return new Response(JSON.stringify({ error: "Failed to retrieve cart" }), {
+            status: 500,
+            headers: {'Content-Type': 'application/json'},
+        });
     }
-
-    const cartIds = userCart.cartIds;
-    const cartProducts = await db.collection('products').find({ id: { $in: cartIds } }).toArray();
-
-    return new Response(JSON.stringify(cartProducts), {
-        status: 200,
-        headers: {'Content-Type': 'application/json'},
-    });
 }
 
 type CartBody = {
@@ -50,59 +49,93 @@ export async function POST(
     request: NextRequest,
     { params }: { params: Promise<Params> }
 ) {
-    const [{ db }, resolvedParams] = await Promise.all([
-        connectToDb(),
-        params
-    ]);
+    try {
+        const [{ db }, resolvedParams] = await Promise.all([
+            connectToDb(),
+            params
+        ]);
 
-    const userId = resolvedParams.id;
-    const body: CartBody = await request.json();
-    const productId = body.productId;
+        const userId = resolvedParams.id;
+        const body: CartBody = await request.json();
+        const productId = body.productId;
 
-    const updatedCart = await db.collection('carts').findOneAndUpdate(
-        { userId },
-        { $push: { cartIds: productId } },
-        { upsert: true, returnDocument: 'after' },
-    )
+        if (!productId) {
+            return new Response(JSON.stringify({ error: "Product ID is required" }), {
+                status: 400,
+                headers: {'Content-Type': 'application/json'},
+            });
+        }
 
-    const cartProducts = await db.collection('products').find({ id: { $in: updatedCart.cartIds } }).toArray()
+        const updatedCart = await db.collection('carts').findOneAndUpdate(
+            { userId },
+            { $push: { cartIds: productId } },
+            { upsert: true, returnDocument: 'after' }
+        );
 
-    return new Response(JSON.stringify(cartProducts), {
-        status: 201,
-        headers: {'Content-Type': 'application/json'},
-    });
+        const cartProducts = await db.collection('products').find({
+            id: { $in: updatedCart.cartIds || [] }
+        }).toArray();
+
+        return new Response(JSON.stringify(cartProducts), {
+            status: 201,
+            headers: {'Content-Type': 'application/json'},
+        });
+    } catch (error) {
+        console.error("POST cart error:", error);
+        return new Response(JSON.stringify({ error: "Failed to add item to cart" }), {
+            status: 500,
+            headers: {'Content-Type': 'application/json'},
+        });
+    }
 }
 
 export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<Params> }
 ) {
-    const [{ db }, resolvedParams] = await Promise.all([
-        connectToDb(),
-        params
-    ]);
+    try {
+        const [{ db }, resolvedParams] = await Promise.all([
+            connectToDb(),
+            params
+        ]);
 
-    const userId = resolvedParams.id;
-    const body = await request.json();
-    const productId = body.productId;
+        const userId = resolvedParams.id;
+        const body = await request.json();
+        const productId = body.productId;
 
-    const updatedCart = await db.collection('carts').findOneAndUpdate(
-        { userId },
-        { $pull: { cartIds: productId } },
-        { returnDocument: 'after' }
-    );
+        if (!productId) {
+            return new Response(JSON.stringify({ error: "Product ID is required" }), {
+                status: 400,
+                headers: {'Content-Type': 'application/json'},
+            });
+        }
 
-    if (!updatedCart) {
-        return new Response(JSON.stringify([]), {
+        const updatedCart = await db.collection('carts').findOneAndUpdate(
+            { userId },
+            { $pull: { cartIds: productId } },
+            { returnDocument: 'after' }
+        );
+
+        if (!updatedCart) {
+            return new Response(JSON.stringify([]), {
+                status: 202,
+                headers: {'Content-Type': 'application/json'},
+            });
+        }
+
+        const cartProducts = await db.collection('products').find({
+            id: { $in: updatedCart.cartIds || [] }
+        }).toArray();
+
+        return new Response(JSON.stringify(cartProducts), {
             status: 202,
             headers: {'Content-Type': 'application/json'},
         });
+    } catch (error) {
+        console.error("DELETE cart error:", error);
+        return new Response(JSON.stringify({ error: "Failed to remove item from cart" }), {
+            status: 500,
+            headers: {'Content-Type': 'application/json'},
+        });
     }
-
-    const cartProducts = await db.collection('products').find({ id: { $in: updatedCart.cartIds } }).toArray();
-
-    return new Response(JSON.stringify(cartProducts), {
-        status: 202,
-        headers: {'Content-Type': 'application/json'},
-    });
 }

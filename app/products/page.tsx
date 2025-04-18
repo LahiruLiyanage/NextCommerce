@@ -8,9 +8,8 @@ export default async function ProductsPage() {
     let cartProducts = [];
 
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-        // Note the correction with the slash
-        const response = await fetch(`${baseUrl}/api/products`, {
+        // Use relative URLs instead of absolute URLs with localhost
+        const response = await fetch(`/api/products`, {
             cache: 'no-store' // Ensure fresh data
         });
 
@@ -19,7 +18,7 @@ export default async function ProductsPage() {
         }
 
         try {
-            const response2 = await fetch(`${baseUrl}/api/users/1/cart`, {
+            const response2 = await fetch(`/api/users/1/cart`, {
                 cache: 'no-store',
             });
 
