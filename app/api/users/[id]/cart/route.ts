@@ -14,10 +14,16 @@ type Params = {
     id: string;
 }
 
-export async function GET(request: NextRequest, { params }: { params: Params }) {
-    const { db } = await connectToDb();
+export async function GET(
+    request: NextRequest,
+    { params }: { params: Promise<Params> }
+) {
+    const [{ db }, resolvedParams] = await Promise.all([
+        connectToDb(),
+        params
+    ]);
 
-    const userId = params.id;
+    const userId = resolvedParams.id;
     const userCart = await db.collection('carts').findOne({ userId });
 
     if (!userCart) {
@@ -40,10 +46,16 @@ type CartBody = {
     productId: string;
 }
 
-export async function POST(request: NextRequest, { params }: { params: Params }) {
-    const { db } = await connectToDb();
+export async function POST(
+    request: NextRequest,
+    { params }: { params: Promise<Params> }
+) {
+    const [{ db }, resolvedParams] = await Promise.all([
+        connectToDb(),
+        params
+    ]);
 
-    const userId = params.id;
+    const userId = resolvedParams.id;
     const body: CartBody = await request.json();
     const productId = body.productId;
 
@@ -61,10 +73,16 @@ export async function POST(request: NextRequest, { params }: { params: Params })
     });
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Params }) {
-    const { db } = await connectToDb();
+export async function DELETE(
+    request: NextRequest,
+    { params }: { params: Promise<Params> }
+) {
+    const [{ db }, resolvedParams] = await Promise.all([
+        connectToDb(),
+        params
+    ]);
 
-    const userId = params.id;
+    const userId = resolvedParams.id;
     const body = await request.json();
     const productId = body.productId;
 
