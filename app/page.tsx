@@ -11,7 +11,7 @@ export default function Home() {
         router.push('/products');
     }, [router]);
 
-    // Optional loading state to show before redirect happens
+    // Optional loading state to show before redirect to the main happens
     return (
         <div className="flex items-center justify-center min-h-screen">
             <p className="text-lg">Redirecting to products page...</p>
