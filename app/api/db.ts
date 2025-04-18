@@ -1,11 +1,12 @@
 import { MongoClient, Db, ServerApiVersion } from 'mongodb';
 
-let cashedClient: MongoClient | null = null;
-let cashedDb: Db | null = null;
+let cachedClient: MongoClient | null = null;
+let cachedDb: Db | null = null;
 
 export async function connectToDb() {
-    if (cashedClient && cashedDb) {
-        return {client: cashedClient, db: cashedDb};
+    if (cachedClient && cachedDb) {
+        // Return cached connection if available
+        return { client: cachedClient, db: cachedDb };
     }
 
     try {
@@ -23,13 +24,17 @@ export async function connectToDb() {
 
         // Connect the client to the server
         await client.connect();
+        console.log("Successfully connected to MongoDB");
 
-        cashedClient = client;
-        cashedDb = client.db('next-commerce-nextjs');
+        const db = client.db('next-commerce-nextjs');
 
-        return { client, db: client.db('next-commerce-nextjs') };
+        // Cache the client and db connections
+        cachedClient = client;
+        cachedDb = db;
+
+        return { client, db };
     } catch (error) {
-        console.error('Failed to connect to MongoDB:', error);
+        console.error('MongoDB connection error:', error);
         // Return a dummy client and db during build time
         if (process.env.NODE_ENV === 'production') {
             return {

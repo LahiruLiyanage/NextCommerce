@@ -7,15 +7,12 @@ type Params = {
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: Promise<Params> }
+    { params }: { params: Params }
 ) {
     try {
-        const [{ db }, resolvedParams] = await Promise.all([
-            connectToDb(),
-            params
-        ]);
+        const { db } = await connectToDb();
+        const userId = params.id;
 
-        const userId = resolvedParams.id;
         const userCart = await db.collection('carts').findOne({ userId });
 
         if (!userCart) {
