@@ -1,14 +1,30 @@
 import ShoppingCartList from "@/app/cart/ShoppingCartList";
+import { headers } from "next/headers";
 
 export const dynamic = 'force-dynamic';
 
 export default async function CartPage() {
-    const response = await fetch(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000' + '/api/users/1/cart', {
-        cache: 'no-cache',
-    });
-    const cartProducts = await response.json();
+    try {
+        // Get the host from request headers
+        const headersList = await headers();
+        const host = headersList.get("host") || "";
+        const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+        const baseUrl = `${protocol}://${host}`;
 
-    return (
-        <ShoppingCartList initialCartProducts={cartProducts}/>
-    )
+        const response = await fetch(`${baseUrl}/api/users/1/cart`, {
+            cache: 'no-cache',
+        });
+
+        const cartProducts = await response.json();
+
+        return (
+            <ShoppingCartList initialCartProducts={cartProducts}/>
+        );
+    } catch (error) {
+        console.error("Error loading cart:", error);
+        // Return empty cart on error
+        return (
+            <ShoppingCartList initialCartProducts={[]}/>
+        );
+    }
 }
