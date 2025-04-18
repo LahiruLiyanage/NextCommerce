@@ -19,13 +19,17 @@ export async function connectToDb() {
                 version: ServerApiVersion.v1,
                 strict: true,
                 deprecationErrors: true,
-            }
+            },
+            // Add connection timeout
+            connectTimeoutMS: 10000,
+            socketTimeoutMS: 45000,
         });
 
         // Connect the client to the server
         await client.connect();
         console.log("Successfully connected to MongoDB");
 
+        // Hardcoded database name
         const db = client.db('next-commerce-nextjs');
 
         // Cache the client and db connections
@@ -35,18 +39,16 @@ export async function connectToDb() {
         return { client, db };
     } catch (error) {
         console.error('MongoDB connection error:', error);
-        // Return a dummy client and db during build time
-        if (process.env.NODE_ENV === 'production') {
-            return {
-                client: {} as MongoClient,
-                db: {
-                    collection: () => ({
-                        find: () => ({ toArray: () => Promise.resolve([]) }),
-                        findOne: () => Promise.resolve(null)
-                    })
-                } as unknown as Db
-            };
+
+        // Log more detailed error information
+        if (error instanceof Error) {
+            console.error('Error details:', {
+                message: error.message,
+                name: error.name,
+                stack: error.stack
+            });
         }
-        throw error;
+
+        throw error; // Always throw the error for proper handling
     }
 }

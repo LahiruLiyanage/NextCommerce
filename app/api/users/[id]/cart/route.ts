@@ -44,15 +44,12 @@ type CartBody = {
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: Promise<Params> }
+    { params }: { params: Params }  // Fixed: params is not a Promise
 ) {
     try {
-        const [{ db }, resolvedParams] = await Promise.all([
-            connectToDb(),
-            params
-        ]);
+        const { db } = await connectToDb();
+        const userId = params.id;  // Direct access, no need to await
 
-        const userId = resolvedParams.id;
         const body: CartBody = await request.json();
         const productId = body.productId;
 
@@ -63,11 +60,14 @@ export async function POST(
             });
         }
 
-        const updatedCart = await db.collection('carts').findOneAndUpdate(
+        const result = await db.collection('carts').findOneAndUpdate(
             { userId },
             { $push: { cartIds: productId } },
             { upsert: true, returnDocument: 'after' }
         );
+
+        // Ensure we have the value property from the result
+        const updatedCart = result.value || result;
 
         const cartProducts = await db.collection('products').find({
             id: { $in: updatedCart.cartIds || [] }
@@ -88,15 +88,12 @@ export async function POST(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: Promise<Params> }
+    { params }: { params: Params }  // Fixed: params is not a Promise
 ) {
     try {
-        const [{ db }, resolvedParams] = await Promise.all([
-            connectToDb(),
-            params
-        ]);
+        const { db } = await connectToDb();
+        const userId = params.id;  // Direct access, no need to await
 
-        const userId = resolvedParams.id;
         const body = await request.json();
         const productId = body.productId;
 
@@ -107,11 +104,15 @@ export async function DELETE(
             });
         }
 
-        const updatedCart = await db.collection('carts').findOneAndUpdate(
+        const result = await db.collection('carts').findOneAndUpdate(
             { userId },
             { $pull: { cartIds: productId } },
             { returnDocument: 'after' }
         );
+
+        // Ensure we have the value property from the result
+        // @ts-ignore
+        const updatedCart = result.value || result;
 
         if (!updatedCart) {
             return new Response(JSON.stringify([]), {
