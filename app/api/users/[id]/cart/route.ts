@@ -7,11 +7,13 @@ type Params = {
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: Params }
+    { params }: { params: Promise<Params> }
 ) {
     try {
         const { db } = await connectToDb();
-        const userId = params.id;
+        // Explicitly await the params object
+        const resolvedParams = await params;
+        const userId = resolvedParams.id;
 
         const userCart = await db.collection('carts').findOne({ userId });
 
@@ -44,14 +46,16 @@ type CartBody = {
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: Params }
+    { params }: { params: Promise<Params> }
 ) {
     try {
-        // Make sure to await params if needed
-        const paramsData = params;
-        const userId = paramsData.id;
-
         const { db } = await connectToDb();
+
+        // Explicitly await the params object
+        const resolvedParams = await params;
+        const userId = resolvedParams.id;
+
+        // Parse request body
         const body: CartBody = await request.json();
         const productId = body.productId;
 
@@ -90,14 +94,15 @@ export async function POST(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: Params }
+    { params }: { params: Promise<Params> }
 ) {
     try {
-        // Make sure to await params if needed
-        const paramsData = params;
-        const userId = paramsData.id;
-
         const { db } = await connectToDb();
+
+        // Explicitly await the params object
+        const resolvedParams = await params;
+        const userId = resolvedParams.id;
+
         const body = await request.json();
         const productId = body.productId;
 
@@ -115,7 +120,7 @@ export async function DELETE(
         );
 
         // Ensure we have the value property from the result
-        const updatedCart = result.value || result;
+        const updatedCart = result?.value || result;
 
         if (!updatedCart) {
             return new Response(JSON.stringify([]), {
