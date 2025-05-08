@@ -7,12 +7,13 @@ type Params = {
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: Promise<Params> }
+    context: { params: Params | Promise<Params> }
 ) {
     try {
         const { db } = await connectToDb();
-        // Explicitly await the params object
-        const resolvedParams = await params;
+
+        // Handle params regardless of whether it's a Promise or not
+        const resolvedParams = context.params instanceof Promise ? await context.params : context.params;
         const userId = resolvedParams.id;
 
         const userCart = await db.collection('carts').findOne({ userId });
@@ -46,18 +47,22 @@ type CartBody = {
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: Promise<Params> }
+    context: { params: Params | Promise<Params> }
 ) {
     try {
         const { db } = await connectToDb();
 
-        // Explicitly await the params object
-        const resolvedParams = await params;
+        // Handle params regardless of whether it's a Promise or not
+        const resolvedParams = context.params instanceof Promise ? await context.params : context.params;
         const userId = resolvedParams.id;
+
+        // Verify the userId is accessible
+        console.log("POST handler - userId:", userId);
 
         // Parse request body
         const body: CartBody = await request.json();
         const productId = body.productId;
+        console.log("POST handler - productId:", productId);
 
         if (!productId) {
             return new Response(JSON.stringify({ error: "Product ID is required" }), {
@@ -74,6 +79,7 @@ export async function POST(
 
         // Ensure we have the value property from the result
         const updatedCart = result.value || result;
+        console.log("POST handler - updated cart:", JSON.stringify(updatedCart));
 
         const cartProducts = await db.collection('products').find({
             id: { $in: updatedCart.cartIds || [] }
@@ -85,7 +91,7 @@ export async function POST(
         });
     } catch (error) {
         console.error("POST cart error:", error);
-        return new Response(JSON.stringify({ error: "Failed to add item to cart" }), {
+        return new Response(JSON.stringify({ error: "Failed to add item to cart", details: error.message }), {
             status: 500,
             headers: {'Content-Type': 'application/json'},
         });
@@ -94,17 +100,21 @@ export async function POST(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: Promise<Params> }
+    context: { params: Params | Promise<Params> }
 ) {
     try {
         const { db } = await connectToDb();
 
-        // Explicitly await the params object
-        const resolvedParams = await params;
+        // Handle params regardless of whether it's a Promise or not
+        const resolvedParams = context.params instanceof Promise ? await context.params : context.params;
         const userId = resolvedParams.id;
+
+        // Verify the userId is accessible
+        console.log("DELETE handler - userId:", userId);
 
         const body = await request.json();
         const productId = body.productId;
+        console.log("DELETE handler - productId:", productId);
 
         if (!productId) {
             return new Response(JSON.stringify({ error: "Product ID is required" }), {
@@ -120,7 +130,8 @@ export async function DELETE(
         );
 
         // Ensure we have the value property from the result
-        const updatedCart = result?.value || result;
+        const updatedCart = result.value || result;
+        console.log("DELETE handler - updated cart:", JSON.stringify(updatedCart));
 
         if (!updatedCart) {
             return new Response(JSON.stringify([]), {
@@ -139,7 +150,7 @@ export async function DELETE(
         });
     } catch (error) {
         console.error("DELETE cart error:", error);
-        return new Response(JSON.stringify({ error: "Failed to remove item from cart" }), {
+        return new Response(JSON.stringify({ error: "Failed to remove item from cart", details: error.message }), {
             status: 500,
             headers: {'Content-Type': 'application/json'},
         });

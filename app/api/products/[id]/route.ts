@@ -6,10 +6,13 @@ type Params = {
     id: string;
 }
 
-export async function GET(request: NextRequest, { params }: { params: Params }) {
+export async function GET(request: NextRequest, context: { params: Params | Promise<Params> }) {
     try {
         const { db } = await connectToDb();
-        const productId = params.id;
+
+        // Handle params regardless of whether it's a Promise or not
+        const resolvedParams = context.params instanceof Promise ? await context.params : context.params;
+        const productId = resolvedParams.id;
 
         // Try to find by string ID first
         let product = await db.collection('products').findOne({ id: productId });
