@@ -44,12 +44,14 @@ type CartBody = {
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: Params }  // Fixed: params is not a Promise
+    { params }: { params: Params }
 ) {
     try {
-        const { db } = await connectToDb();
-        const userId = params.id;  // Direct access, no need to await
+        // Make sure to await params if needed
+        const paramsData = params;
+        const userId = paramsData.id;
 
+        const { db } = await connectToDb();
         const body: CartBody = await request.json();
         const productId = body.productId;
 
@@ -88,12 +90,14 @@ export async function POST(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: Params }  // Fixed: params is not a Promise
+    { params }: { params: Params }
 ) {
     try {
-        const { db } = await connectToDb();
-        const userId = params.id;  // Direct access, no need to await
+        // Make sure to await params if needed
+        const paramsData = params;
+        const userId = paramsData.id;
 
+        const { db } = await connectToDb();
         const body = await request.json();
         const productId = body.productId;
 
@@ -111,7 +115,6 @@ export async function DELETE(
         );
 
         // Ensure we have the value property from the result
-        // @ts-ignore
         const updatedCart = result.value || result;
 
         if (!updatedCart) {
