@@ -5,9 +5,17 @@ export async function GET(request: NextRequest) {
     try {
         const { db } = await connectToDb();
 
-        // Add timeout to prevent hanging requests
+        // Add actual timeout to prevent hanging requests
+        const queryOptions = {
+            maxTimeMS: 10000 // 10 second timeout
+        };
+
+        // Add pagination to limit the number of products returned
+        const limit = 100; // Adjust based on your needs
+
         const products = await db.collection('products')
-            .find({})
+            .find({}, queryOptions)
+            .limit(limit)
             .toArray();
 
         if (!products || products.length === 0) {
@@ -19,7 +27,10 @@ export async function GET(request: NextRequest) {
 
         return new Response(JSON.stringify(products), {
             status: 200,
-            headers: { 'content-type': 'application/json' },
+            headers: {
+                'content-type': 'application/json',
+                'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' // Add caching
+            },
         });
     } catch (error) {
         console.error('Database connection error:', error);

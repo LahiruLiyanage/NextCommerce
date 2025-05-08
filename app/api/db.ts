@@ -10,8 +10,12 @@ export async function connectToDb() {
     }
 
     try {
-        // const uri = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@cluster0.nwrcm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+        // Use environment variables for credentials
         const uri = `mongodb+srv://lahaliya:IRSdeC7N76GgZnUs@cluster0.nwrcm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
+        if (!uri) {
+            throw new Error('MongoDB URI is not defined in environment variables');
+        }
 
         // Create a MongoClient with a MongoClientOptions object to set the Stable API version
         const client = new MongoClient(uri, {
@@ -29,8 +33,9 @@ export async function connectToDb() {
         await client.connect();
         console.log("Successfully connected to MongoDB");
 
-        // Hardcoded database name
-        const db = client.db('next-commerce-nextjs');
+        // Get database name from environment or use default
+        const dbName = process.env.MONGODB_DB || 'next-commerce-nextjs';
+        const db = client.db(dbName);
 
         // Cache the client and db connections
         cachedClient = client;

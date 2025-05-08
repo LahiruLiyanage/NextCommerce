@@ -130,7 +130,7 @@ export async function DELETE(
         );
 
         // Ensure we have the value property from the result
-        const updatedCart = result.value || result;
+        const updatedCart = result?.value || result;
         console.log("DELETE handler - updated cart:", JSON.stringify(updatedCart));
 
         if (!updatedCart) {
